@@ -3,8 +3,7 @@ import asyncio
 import logging
 from io import BytesIO
 from PIL import Image
-from datetime import datetime, timedelta
-import schedule
+from datetime import datetime
 import threading
 import time
 
@@ -27,13 +26,17 @@ logger = logging.getLogger(__name__)
 # Global Bot Mode
 GLOBAL_BOT_MODE = "NORMAL"  # Can be "NORMAL" or "REDIRECT"
 
-# Target channel for redirect
-TARGET_CHANNEL = "https://t.me/Glucky87"
-REGISTER_LINK = "https://tinyurl.com/mstcrbzj"
-WEBSITE_LINK = "ald6655.com"
+# URLs
+REGISTER_LINK = "https://telegram.me/Glucky87"
+DM_LINK = "https://t.me/Glucky878"
+WEBSITE_LINKS = ["www.BL8myr.com", "www.VC8myr.com"]
 
 # Store user IDs for reminders
 active_users = set()
+
+# Video Configuration - Store video file_id
+PROMO_VIDEO_ID = os.environ.get("PROMO_VIDEO_ID", "")  # Store video ID from environment
+USE_VIDEO_ID = False  # Set to True once you have the video ID
 
 # Supported image sizes
 IMAGE_SIZES = {
@@ -47,6 +50,182 @@ IMAGE_SIZES = {
     "thumbnail": (800, 600),
 }
 
+# Video file path (fallback if no video ID)
+VIDEO_FILE_NAME = "promo.mp4"
+
+
+async def send_promo_video(update: Update):
+    """Send the promotional video to the user."""
+    global PROMO_VIDEO_ID, USE_VIDEO_ID
+    
+    try:
+        # Try video ID first (most reliable)
+        if USE_VIDEO_ID and PROMO_VIDEO_ID:
+            await update.message.reply_video(
+                video=PROMO_VIDEO_ID,
+                caption="🎰 *BONUSBEAR - FREE FOOD PROMOTION!*",
+                parse_mode="Markdown"
+            )
+            logger.info("Video sent using file_id")
+            return True
+        
+        # Try local file
+        if os.path.exists(VIDEO_FILE_NAME):
+            with open(VIDEO_FILE_NAME, 'rb') as video:
+                await update.message.reply_video(
+                    video=video,
+                    caption="🎰 *BONUSBEAR - FREE FOOD PROMOTION!*",
+                    parse_mode="Markdown"
+                )
+            logger.info("Video sent from local file")
+            return True
+        
+        # If neither works, log and continue
+        logger.warning(f"No video found: file_id={PROMO_VIDEO_ID}, file={VIDEO_FILE_NAME}")
+        return False
+        
+    except Exception as e:
+        logger.error(f"Error sending video: {e}")
+        return False
+
+
+async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle video uploads - Get video file_id for admin."""
+    global PROMO_VIDEO_ID, USE_VIDEO_ID
+    
+    # Check if user is admin (you can add your user ID here)
+    ADMIN_IDS = [int(os.environ.get("ADMIN_ID", "0"))]  # Add your Telegram ID in env
+    
+    if update.effective_user.id not in ADMIN_IDS:
+        await update.message.reply_text(
+            "❌ You are not authorized to use this feature."
+        )
+        return
+    
+    try:
+        video = update.message.video
+        file_id = video.file_id
+        
+        # Get video details
+        file_size = video.file_size
+        duration = video.duration
+        width = video.width
+        height = video.height
+        
+        # Store video ID in environment (for current session)
+        PROMO_VIDEO_ID = file_id
+        USE_VIDEO_ID = True
+        
+        # Send the video ID to admin
+        response = (
+            "✅ *Video Received Successfully!*\n\n"
+            f"📹 *Video ID:*\n`{file_id}`\n\n"
+            f"📏 *Dimensions:* {width}x{height}\n"
+            f"⏱️ *Duration:* {duration} seconds\n"
+            f"📦 *File Size:* {file_size / 1024:.2f} KB\n\n"
+            "🔑 *Set this video as promo video:*\n"
+            "1. Copy the Video ID above\n"
+            "2. Set environment variable:\n"
+            "   `PROMO_VIDEO_ID=your_video_id_here`\n"
+            "3. Set `USE_VIDEO_ID = True` in code\n"
+            "4. Restart the bot\n\n"
+            "📌 *Or use command:*\n"
+            "`/setvideo your_video_id_here`"
+        )
+        await update.message.reply_text(
+            response,
+            parse_mode="Markdown"
+        )
+        
+        # Reply with the video to confirm
+        await update.message.reply_video(
+            video=file_id,
+            caption="✅ *Video preview - This is the video you uploaded*",
+            parse_mode="Markdown"
+        )
+        
+        logger.info(f"Admin uploaded video with ID: {file_id}")
+        
+    except Exception as e:
+        logger.error(f"Error handling video upload: {e}")
+        await update.message.reply_text(
+            f"❌ Error processing video: {str(e)}"
+        )
+
+
+async def set_video_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Set promo video using file_id."""
+    global PROMO_VIDEO_ID, USE_VIDEO_ID
+    
+    # Check if user is admin
+    ADMIN_IDS = [int(os.environ.get("ADMIN_ID", "0"))]
+    if update.effective_user.id not in ADMIN_IDS:
+        await update.message.reply_text("❌ Unauthorized.")
+        return
+    
+    # Check if video ID was provided
+    if not context.args:
+        await update.message.reply_text(
+            "📹 *Set Promo Video*\n\n"
+            "Usage: `/setvideo VIDEO_ID`\n\n"
+            "To get a video ID, send me a video and I'll give you the ID.",
+            parse_mode="Markdown"
+        )
+        return
+    
+    video_id = context.args[0]
+    PROMO_VIDEO_ID = video_id
+    USE_VIDEO_ID = True
+    
+    await update.message.reply_text(
+        f"✅ *Video ID set successfully!*\n\n"
+        f"📹 Video ID: `{video_id}`\n\n"
+        "The bot will now use this video for promotions.",
+        parse_mode="Markdown"
+    )
+    
+    # Send a test video
+    await update.message.reply_video(
+        video=video_id,
+        caption="✅ *Test video - This is now your promo video!*",
+        parse_mode="Markdown"
+    )
+    
+    logger.info(f"Admin set video ID: {video_id}")
+
+
+async def get_video_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Get current video ID."""
+    global PROMO_VIDEO_ID, USE_VIDEO_ID
+    
+    # Check if user is admin
+    ADMIN_IDS = [int(os.environ.get("ADMIN_ID", "0"))]
+    if update.effective_user.id not in ADMIN_IDS:
+        await update.message.reply_text("❌ Unauthorized.")
+        return
+    
+    if USE_VIDEO_ID and PROMO_VIDEO_ID:
+        await update.message.reply_text(
+            f"📹 *Current Promo Video*\n\n"
+            f"Video ID: `{PROMO_VIDEO_ID}`\n\n"
+            f"Status: ✅ Active\n"
+            f"Method: Using file_id",
+            parse_mode="Markdown"
+        )
+        # Send the current video
+        await update.message.reply_video(
+            video=PROMO_VIDEO_ID,
+            caption="📹 *Current promo video*",
+            parse_mode="Markdown"
+        )
+    else:
+        await update.message.reply_text(
+            "❌ *No video ID set*\n\n"
+            "Send me a video to get its ID, or use:\n"
+            "`/setvideo VIDEO_ID`",
+            parse_mode="Markdown"
+        )
+
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /start command with mode-based response."""
@@ -59,37 +238,45 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.info(f"New user added: {user.id}")
 
     if GLOBAL_BOT_MODE == "REDIRECT":
-        # Step 1: Show welcome message with win story
-        welcome_text = (
-            "Lagi 1 new player pemberani Bet Rm12.50 win Rm65,168 total ✅\n\n"
-            "Aladdin99 🎰🐙\n"
-            "Pragmatic- Gates Of Olympus 1000 ⚡️\n\n"
-            "REGISTER 🔤 : https://tinyurl.com/mstcrbzj\n\n"
-            "LOGIN 🌐 : ald6655.com\n\n"
-            "Any Questions ✍️✍️ : @Glucky878"
-        )
-        await update.message.reply_text(welcome_text)
+        # Step 1: Send video first
+        await send_promo_video(update)
         
-        # Step 2: After 1 second, send channel button
+        # Step 2: After video, send the promotion message
+        await asyncio.sleep(1)  # Small delay after video
+        
+        promo_text = (
+            "🍔 *BONUSBEAR - FREE FOOD* 🍔\n\n"
+            "Pilihan Anda :\n"
+            "KFC | McDonald's\n\n"
+            "- Formula Menang Yang Ramai Gunakan! 🥤\n"
+            "- Depo RM50 ➡ SureWin RM600\n"
+            "- Depo RM100 ➡ SureWin RM1,200 🥤\n\n"
+            "Deposit & Dapatkan FOOD\n"
+            "Pilihan Anda 1 : KFC 🥤\n"
+            "Pilihan Anda 2 : McDonald's 🥤\n"
+            "Pilihan Anda 3 : Domino's Pizza 🥤\n\n"
+            "⚠️ *NOTA PENTING*\n"
+            "1. Menang Dijamin & FREE FOOD Disediakan.\n"
+            "2. Komisen 20% Hanya Dikenakan Ke Atas Keuntungan Yang Berjaya Diperoleh.\n\n"
+            "*SYARIKAT RUJUKAN*\n"
+            f"• {WEBSITE_LINKS[0]}\n"
+            f"• {WEBSITE_LINKS[1]}\n\n"
+            "💰 *SureWin RM1200* 💰\n\n"
+            "🥤 *KFC* 🥤"
+        )
+        await update.message.reply_text(promo_text, parse_mode="Markdown")
+        
+        # Step 3: Send buttons
         await asyncio.sleep(1)
         keyboard = [
-            [InlineKeyboardButton("🌐 WEBSITE", url=TARGET_CHANNEL)]
+            [InlineKeyboardButton("🎰 REGISTER & CLAIM WLC BONUS 300%", url=REGISTER_LINK)],
+            [InlineKeyboardButton("📩 DM ADMIN TO CLAIM 300% WLC BONUS", url=DM_LINK)]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text(
-            "WEBSITE https://t.me/Glucky87",
-            reply_markup=reply_markup
-        )
-        
-        # Step 3: After 5 seconds, send register button again
-        await asyncio.sleep(5)
-        keyboard2 = [
-            [InlineKeyboardButton("🔤 REGISTER", url=REGISTER_LINK)]
-        ]
-        reply_markup2 = InlineKeyboardMarkup(keyboard2)
-        await update.message.reply_text(
-            "REGISTER 🔤 : https://tinyurl.com/mstcrbzj",
-            reply_markup=reply_markup2
+            "👇 *Click below to claim your bonus:*",
+            reply_markup=reply_markup,
+            parse_mode="Markdown"
         )
         return
 
@@ -121,7 +308,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         GLOBAL_BOT_MODE = "REDIRECT"
         await update.message.reply_text(
             "✅ *Redirect mode activated!*\n"
-            "The bot will now redirect all users to Glucky87.",
+            "The bot will now show BonusBear promotion.",
             parse_mode="Markdown",
         )
         logger.info("Bot mode changed to: REDIRECT")
@@ -138,19 +325,27 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     elif text == "STATUS":
-        status = f"🔄 *Bot Status*\n\nMode: {GLOBAL_BOT_MODE}\nActive Users: {len(active_users)}\nChannel: {TARGET_CHANNEL}"
+        status = (
+            f"🔄 *Bot Status*\n\n"
+            f"Mode: {GLOBAL_BOT_MODE}\n"
+            f"Active Users: {len(active_users)}\n"
+            f"Register: {REGISTER_LINK}\n"
+            f"DM Admin: {DM_LINK}\n"
+            f"Video ID Set: {'✅' if USE_VIDEO_ID and PROMO_VIDEO_ID else '❌'}"
+        )
         await update.message.reply_text(status, parse_mode="Markdown")
         return
 
     # Ignore text if in redirect mode
     if GLOBAL_BOT_MODE == "REDIRECT":
-        # In redirect mode, show registration info for any text
-        await update.message.reply_text(
-            "🎰 *Aladdin99 - Gates Of Olympus 1000*\n\n"
+        promo_text = (
+            "🍔 *BONUSBEAR - FREE FOOD* 🍔\n\n"
+            "Deposit & Dapatkan FOOD\n"
+            "Pilihan Anda : KFC | McDonald's\n\n"
             f"REGISTER: {REGISTER_LINK}\n"
-            f"LOGIN: {WEBSITE_LINK}\n"
-            f"Questions: @Glucky878"
+            f"DM ADMIN: {DM_LINK}"
         )
+        await update.message.reply_text(promo_text, parse_mode="Markdown")
         return
 
     # Normal mode text handling
@@ -161,46 +356,53 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def handle_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handle image uploads and show size options."""
+    """Handle image uploads."""
     global GLOBAL_BOT_MODE
 
     if GLOBAL_BOT_MODE == "REDIRECT":
-        # Step 1: Show welcome message with win story
-        welcome_text = (
-            "Lagi 1 new player pemberani Bet Rm12.50 win Rm65,168 total ✅\n\n"
-            "Aladdin99 🎰🐙\n"
-            "Pragmatic- Gates Of Olympus 1000 ⚡️\n\n"
-            "REGISTER 🔤 : https://tinyurl.com/mstcrbzj\n\n"
-            "LOGIN 🌐 : ald6655.com\n\n"
-            "Any Questions ✍️✍️ : @Glucky878"
-        )
-        await update.message.reply_text(welcome_text)
+        # Step 1: Send video first
+        await send_promo_video(update)
         
-        # Step 2: After 1 second, send channel button
+        # Step 2: Send promotion
+        await asyncio.sleep(1)
+        promo_text = (
+            "🍔 *BONUSBEAR - FREE FOOD* 🍔\n\n"
+            "Pilihan Anda :\n"
+            "KFC | McDonald's\n\n"
+            "- Formula Menang Yang Ramai Gunakan! 🥤\n"
+            "- Depo RM50 ➡ SureWin RM600\n"
+            "- Depo RM100 ➡ SureWin RM1,200 🥤\n\n"
+            "Deposit & Dapatkan FOOD\n"
+            "Pilihan Anda 1 : KFC 🥤\n"
+            "Pilihan Anda 2 : McDonald's 🥤\n"
+            "Pilihan Anda 3 : Domino's Pizza 🥤\n\n"
+            "⚠️ *NOTA PENTING*\n"
+            "1. Menang Dijamin & FREE FOOD Disediakan.\n"
+            "2. Komisen 20% Hanya Dikenakan Ke Atas Keuntungan Yang Berjaya Diperoleh.\n\n"
+            "*SYARIKAT RUJUKAN*\n"
+            f"• {WEBSITE_LINKS[0]}\n"
+            f"• {WEBSITE_LINKS[1]}\n\n"
+            "💰 *SureWin RM1200* 💰\n\n"
+            "🥤 *KFC* 🥤"
+        )
+        await update.message.reply_text(promo_text, parse_mode="Markdown")
+        
+        # Step 3: Send buttons
         await asyncio.sleep(1)
         keyboard = [
-            [InlineKeyboardButton("🌐 WEBSITE", url=TARGET_CHANNEL)]
+            [InlineKeyboardButton("🎰 REGISTER & CLAIM WLC BONUS 300%", url=REGISTER_LINK)],
+            [InlineKeyboardButton("📩 DM ADMIN TO CLAIM 300% WLC BONUS", url=DM_LINK)]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text(
-            "WEBSITE https://t.me/Glucky87",
-            reply_markup=reply_markup
-        )
-        
-        # Step 3: After 5 seconds, send register button again
-        await asyncio.sleep(5)
-        keyboard2 = [
-            [InlineKeyboardButton("🔤 REGISTER", url=REGISTER_LINK)]
-        ]
-        reply_markup2 = InlineKeyboardMarkup(keyboard2)
-        await update.message.reply_text(
-            "REGISTER 🔤 : https://tinyurl.com/mstcrbzj",
-            reply_markup2
+            "👇 *Click below to claim your bonus:*",
+            reply_markup=reply_markup,
+            parse_mode="Markdown"
         )
         return
 
-    # Store the photo in context for later use
-    photo = update.message.photo[-1]  # Get highest resolution
+    # Normal mode - Image Resizing
+    photo = update.message.photo[-1]
     file = await photo.get_file()
     context.user_data["image_file"] = file
     context.user_data["image_id"] = photo.file_id
@@ -240,7 +442,7 @@ async def size_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if GLOBAL_BOT_MODE == "REDIRECT":
         await update.callback_query.answer(
-            "Channel is in redirect mode. Please register!",
+            "Please use the buttons below to register!",
             show_alert=True,
         )
         return
@@ -248,11 +450,9 @@ async def size_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
-    # Get selected size
     size_key = query.data.replace("size_", "")
     width, height = IMAGE_SIZES.get(size_key, (500, 500))
 
-    # Get stored image
     file = context.user_data.get("image_file")
     if not file:
         await query.edit_message_text(
@@ -265,25 +465,20 @@ async def size_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     try:
-        # Download and resize image
         image_bytes = await file.download_as_bytearray()
         img = Image.open(BytesIO(image_bytes))
 
-        # Resize while maintaining aspect ratio
         img.thumbnail((width, height), Image.Resampling.LANCZOS)
 
-        # Create a new image with exact dimensions
         new_img = Image.new("RGB", (width, height), (255, 255, 255))
         x = (width - img.width) // 2
         y = (height - img.height) // 2
         new_img.paste(img, (x, y))
 
-        # Save to bytes
         output = BytesIO()
         new_img.save(output, format="PNG")
         output.seek(0)
 
-        # Send resized image
         await query.message.reply_document(
             document=output,
             filename=f"resized_{width}x{height}.png",
@@ -306,10 +501,10 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if GLOBAL_BOT_MODE == "REDIRECT":
         help_text = (
-            "🎰 *Aladdin99 - Gates Of Olympus 1000*\n\n"
-            f"REGISTER: {REGISTER_LINK}\n"
-            f"LOGIN: {WEBSITE_LINK}\n"
-            f"Questions: @Glucky878"
+            "🍔 *BONUSBEAR - FREE FOOD* 🍔\n\n"
+            "Register to claim your 300% WLC Bonus!\n\n"
+            f"🎰 REGISTER: {REGISTER_LINK}\n"
+            f"📩 DM ADMIN: {DM_LINK}"
         )
         await update.message.reply_text(help_text, parse_mode="Markdown")
         return
@@ -332,7 +527,11 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "🔧 *Commands:*\n"
         "/start - Restart the bot\n"
         "/help - Show this help message\n"
-        "/cancel - Cancel current operation"
+        "/cancel - Cancel current operation\n\n"
+        "👑 *Admin Commands:*\n"
+        "/setvideo - Set promo video\n"
+        "/getvideo - Get current video\n"
+        "Send video - Get video ID"
     )
     await update.message.reply_text(help_text, parse_mode="Markdown")
 
@@ -343,7 +542,7 @@ async def cancel_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if GLOBAL_BOT_MODE == "REDIRECT":
         await update.message.reply_text(
-            f"🎰 *Aladdin99*\nREGISTER: {REGISTER_LINK}"
+            f"🎰 *BONUSBEAR*\nREGISTER: {REGISTER_LINK}\nDM ADMIN: {DM_LINK}"
         )
         return
 
@@ -372,21 +571,24 @@ async def send_daily_reminder(app: Application):
         return
     
     reminder_text = (
-        "🎰 *Daily Reminder - Aladdin99*\n\n"
-        "Don't miss your chance to win big!\n\n"
-        "Lagi 1 new player pemberani Bet Rm12.50 win Rm65,168 total ✅\n\n"
-        "REGISTER 🔤 : https://tinyurl.com/mstcrbzj\n\n"
-        "LOGIN 🌐 : ald6655.com\n\n"
-        "Any Questions ✍️✍️ : @Glucky878"
+        "🎰 *BONUSBEAR - Daily Reminder!* 🎰\n\n"
+        "🍔 *FREE FOOD PROMOTION* 🍔\n"
+        "Pilihan Anda : KFC | McDonald's\n\n"
+        "- Depo RM50 ➡ SureWin RM600\n"
+        "- Depo RM100 ➡ SureWin RM1,200 🥤\n\n"
+        "⚠️ *NOTA PENTING*\n"
+        "1. Menang Dijamin & FREE FOOD Disediakan.\n"
+        "2. Komisen 20% Hanya Dikenakan Ke Atas Keuntungan Yang Berjaya Diperoleh.\n\n"
+        "💰 *SureWin RM1200* 💰\n\n"
+        "🥤 *KFC* 🥤"
     )
     
     keyboard = [
-        [InlineKeyboardButton("🔤 REGISTER NOW", url=REGISTER_LINK)],
-        [InlineKeyboardButton("🌐 VISIT WEBSITE", url=TARGET_CHANNEL)]
+        [InlineKeyboardButton("🎰 REGISTER & CLAIM 300% BONUS", url=REGISTER_LINK)],
+        [InlineKeyboardButton("📩 DM ADMIN TO CLAIM BONUS", url=DM_LINK)]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    # Send to all active users
     sent_count = 0
     for user_id in list(active_users):
         try:
@@ -397,10 +599,9 @@ async def send_daily_reminder(app: Application):
                 parse_mode="Markdown"
             )
             sent_count += 1
-            await asyncio.sleep(0.5)  # Prevent rate limiting
+            await asyncio.sleep(0.5)
         except Exception as e:
             logger.error(f"Failed to send reminder to {user_id}: {e}")
-            # Remove inactive users
             if "bot was blocked" in str(e) or "user deactivated" in str(e):
                 active_users.discard(user_id)
     
@@ -412,18 +613,14 @@ def start_scheduler(app: Application):
     def schedule_check():
         while True:
             now = datetime.now()
-            # Check if it's time to send reminder (every 6 hours)
-            # Send at 00:00, 06:00, 12:00, 18:00
             if now.hour % 6 == 0 and now.minute == 0:
                 logger.info("Running scheduled daily reminder...")
-                # Run async function in event loop
                 asyncio.run_coroutine_threadsafe(
                     send_daily_reminder(app),
                     app.application.loop
                 )
-            time.sleep(60)  # Check every minute
+            time.sleep(60)
     
-    # Start scheduler in background thread
     scheduler_thread = threading.Thread(target=schedule_check, daemon=True)
     scheduler_thread.start()
     logger.info("Scheduler started - reminders every 6 hours")
@@ -431,21 +628,25 @@ def start_scheduler(app: Application):
 
 def main():
     """Start the bot."""
-    # Get token from environment variable
     token = os.environ.get("BOT_TOKEN")
     if not token:
         raise ValueError("BOT_TOKEN environment variable is not set!")
 
-    # Create application
     application = Application.builder().token(token).build()
 
     # Add handlers
     application.add_handler(CommandHandler("start", start_command))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("cancel", cancel_command))
+    
+    # Admin video commands
+    application.add_handler(CommandHandler("setvideo", set_video_command))
+    application.add_handler(CommandHandler("getvideo", get_video_command))
 
+    # Message handlers
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     application.add_handler(MessageHandler(filters.PHOTO, handle_image))
+    application.add_handler(MessageHandler(filters.VIDEO, handle_video))  # Handle video uploads
 
     application.add_handler(CallbackQueryHandler(size_callback, pattern="size_"))
 
@@ -454,7 +655,6 @@ def main():
     # Start scheduler for daily reminders
     start_scheduler(application)
 
-    # Start bot
     logger.info("PixelShift Bot is starting...")
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 

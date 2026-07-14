@@ -34,9 +34,9 @@ WEBSITE_LINKS = ["www.BL8myr.com", "www.VC8myr.com"]
 # Store user IDs for reminders
 active_users = set()
 
-# Video Configuration - Store video file_id
-PROMO_VIDEO_ID = os.environ.get("PROMO_VIDEO_ID", "")  # Store video ID from environment
-USE_VIDEO_ID = False  # Set to True once you have the video ID
+# Video Configuration - Your video file ID
+PROMO_VIDEO_ID = "BAACAgQAAxkBAAIE0GpWfmLkPc-4mP2W7PEaS3wYOthcAALoIQACYgiwUsRIo56wMoFLPQQ"
+USE_VIDEO_ID = True  # Set to True to use video ID
 
 # Supported image sizes
 IMAGE_SIZES = {

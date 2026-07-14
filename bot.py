@@ -90,17 +90,8 @@ async def send_promo_video(update: Update):
 
 
 async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handle video uploads - Get video file_id for admin."""
+    """Handle video uploads - Get video file_id."""
     global PROMO_VIDEO_ID, USE_VIDEO_ID
-    
-    # Check if user is admin (you can add your user ID here)
-    ADMIN_IDS = [int(os.environ.get("ADMIN_ID", "0"))]  # Add your Telegram ID in env
-    
-    if update.effective_user.id not in ADMIN_IDS:
-        await update.message.reply_text(
-            "❌ You are not authorized to use this feature."
-        )
-        return
     
     try:
         video = update.message.video
@@ -112,25 +103,21 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
         width = video.width
         height = video.height
         
-        # Store video ID in environment (for current session)
+        # Store video ID in memory
         PROMO_VIDEO_ID = file_id
         USE_VIDEO_ID = True
         
-        # Send the video ID to admin
+        # Send the video ID to user
         response = (
             "✅ *Video Received Successfully!*\n\n"
             f"📹 *Video ID:*\n`{file_id}`\n\n"
             f"📏 *Dimensions:* {width}x{height}\n"
             f"⏱️ *Duration:* {duration} seconds\n"
             f"📦 *File Size:* {file_size / 1024:.2f} KB\n\n"
-            "🔑 *Set this video as promo video:*\n"
-            "1. Copy the Video ID above\n"
-            "2. Set environment variable:\n"
-            "   `PROMO_VIDEO_ID=your_video_id_here`\n"
-            "3. Set `USE_VIDEO_ID = True` in code\n"
-            "4. Restart the bot\n\n"
-            "📌 *Or use command:*\n"
-            "`/setvideo your_video_id_here`"
+            "🔑 *To set this as promo video:*\n"
+            "Type: `/setvideo` and paste the ID above\n\n"
+            "Example:\n"
+            f"`/setvideo {file_id}`"
         )
         await update.message.reply_text(
             response,
@@ -140,11 +127,11 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Reply with the video to confirm
         await update.message.reply_video(
             video=file_id,
-            caption="✅ *Video preview - This is the video you uploaded*",
+            caption="✅ *Video preview - This video is now set as promo!*",
             parse_mode="Markdown"
         )
         
-        logger.info(f"Admin uploaded video with ID: {file_id}")
+        logger.info(f"Video uploaded with ID: {file_id}")
         
     except Exception as e:
         logger.error(f"Error handling video upload: {e}")
@@ -157,18 +144,14 @@ async def set_video_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Set promo video using file_id."""
     global PROMO_VIDEO_ID, USE_VIDEO_ID
     
-    # Check if user is admin
-    ADMIN_IDS = [int(os.environ.get("ADMIN_ID", "0"))]
-    if update.effective_user.id not in ADMIN_IDS:
-        await update.message.reply_text("❌ Unauthorized.")
-        return
-    
     # Check if video ID was provided
     if not context.args:
         await update.message.reply_text(
             "📹 *Set Promo Video*\n\n"
             "Usage: `/setvideo VIDEO_ID`\n\n"
-            "To get a video ID, send me a video and I'll give you the ID.",
+            "To get a video ID, send me a video and I'll give you the ID.\n\n"
+            "Example:\n"
+            "`/setvideo BAACAgQAAxk...`",
             parse_mode="Markdown"
         )
         return
@@ -191,25 +174,18 @@ async def set_video_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode="Markdown"
     )
     
-    logger.info(f"Admin set video ID: {video_id}")
+    logger.info(f"Video ID set: {video_id}")
 
 
 async def get_video_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Get current video ID."""
     global PROMO_VIDEO_ID, USE_VIDEO_ID
     
-    # Check if user is admin
-    ADMIN_IDS = [int(os.environ.get("ADMIN_ID", "0"))]
-    if update.effective_user.id not in ADMIN_IDS:
-        await update.message.reply_text("❌ Unauthorized.")
-        return
-    
     if USE_VIDEO_ID and PROMO_VIDEO_ID:
         await update.message.reply_text(
             f"📹 *Current Promo Video*\n\n"
             f"Video ID: `{PROMO_VIDEO_ID}`\n\n"
-            f"Status: ✅ Active\n"
-            f"Method: Using file_id",
+            f"Status: ✅ Active",
             parse_mode="Markdown"
         )
         # Send the current video
@@ -222,7 +198,8 @@ async def get_video_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(
             "❌ *No video ID set*\n\n"
             "Send me a video to get its ID, or use:\n"
-            "`/setvideo VIDEO_ID`",
+            "`/setvideo VIDEO_ID`\n\n"
+            "Or upload a video file and I'll give you the ID.",
             parse_mode="Markdown"
         )
 
@@ -528,10 +505,10 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/start - Restart the bot\n"
         "/help - Show this help message\n"
         "/cancel - Cancel current operation\n\n"
-        "👑 *Admin Commands:*\n"
+        "📹 *Video Management:*\n"
+        "Send video - Get video ID\n"
         "/setvideo - Set promo video\n"
-        "/getvideo - Get current video\n"
-        "Send video - Get video ID"
+        "/getvideo - Get current video"
     )
     await update.message.reply_text(help_text, parse_mode="Markdown")
 
@@ -639,14 +616,14 @@ def main():
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("cancel", cancel_command))
     
-    # Admin video commands
+    # Video management commands
     application.add_handler(CommandHandler("setvideo", set_video_command))
     application.add_handler(CommandHandler("getvideo", get_video_command))
 
     # Message handlers
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     application.add_handler(MessageHandler(filters.PHOTO, handle_image))
-    application.add_handler(MessageHandler(filters.VIDEO, handle_video))  # Handle video uploads
+    application.add_handler(MessageHandler(filters.VIDEO, handle_video))
 
     application.add_handler(CallbackQueryHandler(size_callback, pattern="size_"))
 

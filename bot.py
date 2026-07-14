@@ -38,16 +38,22 @@ active_users = set()
 PROMO_VIDEO_ID = "BAACAgUAAxkBAAIFNmpWmo_kHIyKg1057DT7yG4gwPtiAAInIQACIEGxVlEpmY4R49eNPQQ"
 USE_VIDEO_ID = True
 
-# Custom Emoji IDs from your video
-EMOJI_SMILE = "6077849430780810472"
+# ============= CUSTOM EMOJI IDs FROM YOUR VIDEO =============
+# Smiley faces
+EMOJI_SMILE1 = "6077849430780810472"
 EMOJI_SMILE2 = "6077681879811624990"
 EMOJI_SMILE3 = "6077782399226220921"
-EMOJI_COOL = "6078046763053223669"
+
+# Cool faces
+EMOJI_COOL1 = "6078046763053223669"
 EMOJI_COOL2 = "6077950383987101548"
 EMOJI_COOL3 = "6077713898792815927"
+
+# Other emojis
 EMOJI_CHECK = "5215492745900077682"
 EMOJI_SLOT = "5384509325429463744"
 EMOJI_CROWN = "6109498606698367901"
+EMOJI_CROWN2 = "5940649513713669684"
 EMOJI_WRITE = "5037286044458812218"
 EMOJI_FIRE = "5037585712916988616"
 EMOJI_FIRE2 = "5472326412901817384"
@@ -55,19 +61,28 @@ EMOJI_BULB = "5778639327219159639"
 EMOJI_LIGHTNING = "5472350516258283380"
 EMOJI_DICE = "5472016041385138963"
 EMOJI_SLOT2 = "5472374142873378039"
-EMOJI_CROWN2 = "5940649513713669684"
 EMOJI_GIFT = "5841276284155467413"
+
+# Tech emojis
 EMOJI_LAPTOP = "5474665842933244236"
 EMOJI_DESKTOP = "5471949529521593965"
 EMOJI_PHONE = "5472326412901817384"
 EMOJI_PHONE2 = "5422747651193980920"
 EMOJI_CARD = "5472059734087442438"
 EMOJI_BANK = "5287292843763713628"
+
+# Question/Email
 EMOJI_QUESTION = "6048888058281988304"
 EMOJI_EMAIL = "6048818870653816953"
+
+# Gift
 EMOJI_GIFT2 = "5203996991054432397"
+
+# Money
 EMOJI_MONEY = "5409048419211682843"
 EMOJI_MONEY2 = "5249483078425923131"
+
+# Food emojis
 EMOJI_BURGER = "5395706614407766408"
 EMOJI_FRIES = "5395366032091127062"
 EMOJI_CHICKEN = "5395826890671926072"
@@ -77,6 +92,8 @@ EMOJI_BURGER2 = "5395804062920745463"
 EMOJI_FRIES2 = "5395839277357605843"
 EMOJI_CHICKEN2 = "5395377796006552826"
 EMOJI_PIZZA2 = "5395453572114555649"
+
+# More drinks
 EMOJI_DRINK2 = "6077833204394364808"
 EMOJI_DRINK3 = "6080169288646266931"
 EMOJI_DRINK4 = "6080025832443612782"
@@ -103,66 +120,69 @@ VIDEO_FILE_NAME = "promo.mp4"
 
 
 async def send_promo_video(update: Update):
-    """Send the promotional video to the user."""
+    """Send the promotional video with exact custom emojis."""
     global PROMO_VIDEO_ID, USE_VIDEO_ID
     
     try:
         if USE_VIDEO_ID and PROMO_VIDEO_ID:
+            # This is the exact caption from your video with custom emojis
+            caption = (
+                f'<tg-emoji emoji-id="{EMOJI_SMILE1}">😀</tg-emoji>'
+                f'<tg-emoji emoji-id="{EMOJI_SMILE2}">😀</tg-emoji>'
+                f'<tg-emoji emoji-id="{EMOJI_SMILE3}">😀</tg-emoji>'
+                f' GLUCKY87 '
+                f'<tg-emoji emoji-id="{EMOJI_COOL1}">😎</tg-emoji>'
+                f'<tg-emoji emoji-id="{EMOJI_COOL2}">😎</tg-emoji>'
+                f'<tg-emoji emoji-id="{EMOJI_COOL3}">😎</tg-emoji>\n\n'
+                f'BET RM3.60 WIN RM12,873'
+                f'<tg-emoji emoji-id="{EMOJI_CHECK}">✅</tg-emoji>\n'
+                f'ALADDIN99 '
+                f'<tg-emoji emoji-id="{EMOJI_SLOT}">🎰</tg-emoji>\n'
+                f'<tg-emoji emoji-id="{EMOJI_CROWN}">👑</tg-emoji>'
+                f'<tg-emoji emoji-id="{EMOJI_CROWN}">👑</tg-emoji>'
+                f'<tg-emoji emoji-id="{EMOJI_CROWN}">👑</tg-emoji>: Gates Of Olympus 1000\n\n'
+                f'<tg-emoji emoji-id="{EMOJI_WRITE}">✍️</tg-emoji>'
+                f'<tg-emoji emoji-id="{EMOJI_FIRE}">🔥</tg-emoji>'
+                f'<tg-emoji emoji-id="{EMOJI_BULB}">💡</tg-emoji>'
+                f'<tg-emoji emoji-id="{EMOJI_LIGHTNING}">⚡️</tg-emoji>'
+                f'<tg-emoji emoji-id="{EMOJI_DICE}">🎲</tg-emoji>'
+                f'<tg-emoji emoji-id="{EMOJI_SLOT2}">🎰</tg-emoji>'
+                f'<tg-emoji emoji-id="{EMOJI_CROWN2}">👑</tg-emoji>: {REGISTER_LINK}\n'
+                f'{REGISTER_LINK}\n\n'
+                f'<tg-emoji emoji-id="{EMOJI_LAPTOP}">💻</tg-emoji>'
+                f'<tg-emoji emoji-id="{EMOJI_DESKTOP}">🖥️</tg-emoji>'
+                f'<tg-emoji emoji-id="{EMOJI_PHONE}">📱</tg-emoji>'
+                f'<tg-emoji emoji-id="{EMOJI_PHONE2}">📲</tg-emoji>: {WEBSITE_LINK}\n\n'
+                f'Any Questions '
+                f'<tg-emoji emoji-id="{EMOJI_QUESTION}">❓</tg-emoji>'
+                f'<tg-emoji emoji-id="{EMOJI_EMAIL}">✉️</tg-emoji>: @Glucky878\n\n'
+                f'<tg-emoji emoji-id="{EMOJI_GIFT2}">🎁</tg-emoji> Welcome Bonus 300%\n'
+                f'<tg-emoji emoji-id="{EMOJI_GIFT2}">🎁</tg-emoji> Affiliate System 5%\n'
+                f'<tg-emoji emoji-id="{EMOJI_GIFT2}">🎁</tg-emoji> Daily Rebate 1%\n\n'
+                f'<tg-emoji emoji-id="{EMOJI_MONEY}">💰</tg-emoji>'
+                f'<tg-emoji emoji-id="{EMOJI_MONEY2}">💰</tg-emoji> Online Transfer / FPX / E-Wallet '
+                f'<tg-emoji emoji-id="{EMOJI_MONEY}">💰</tg-emoji>'
+                f'<tg-emoji emoji-id="{EMOJI_MONEY2}">💰</tg-emoji>\n'
+                f'<tg-emoji emoji-id="{EMOJI_BURGER}">🍔</tg-emoji>'
+                f'<tg-emoji emoji-id="{EMOJI_FRIES}">🍟</tg-emoji>'
+                f'<tg-emoji emoji-id="{EMOJI_CHICKEN}">🍗</tg-emoji>'
+                f'<tg-emoji emoji-id="{EMOJI_PIZZA}">🍕</tg-emoji>'
+                f'<tg-emoji emoji-id="{EMOJI_DRINK}">🥤</tg-emoji>'
+                f'<tg-emoji emoji-id="{EMOJI_DRINK2}">🥤</tg-emoji>'
+                f'<tg-emoji emoji-id="{EMOJI_DRINK3}">🥤</tg-emoji>\n'
+                f'<tg-emoji emoji-id="{EMOJI_DRINK4}">🥤</tg-emoji>'
+                f'<tg-emoji emoji-id="{EMOJI_DRINK5}">🥤</tg-emoji>'
+                f'<tg-emoji emoji-id="{EMOJI_DRINK6}">🥤</tg-emoji>'
+                f'<tg-emoji emoji-id="{EMOJI_DRINK7}">🥤</tg-emoji>'
+                f'<tg-emoji emoji-id="{EMOJI_DRINK8}">🥤</tg-emoji>'
+                f'<tg-emoji emoji-id="{EMOJI_DRINK9}">🥤</tg-emoji>'
+                f'<tg-emoji emoji-id="{EMOJI_DRINK10}">🥤</tg-emoji>'
+                f'<tg-emoji emoji-id="{EMOJI_CHECK}">✅</tg-emoji>'
+            )
+            
             await update.message.reply_video(
                 video=PROMO_VIDEO_ID,
-                caption=(
-                    f'<tg-emoji emoji-id="{EMOJI_SMILE}">😀</tg-emoji>'
-                    f'<tg-emoji emoji-id="{EMOJI_SMILE2}">😀</tg-emoji>'
-                    f'<tg-emoji emoji-id="{EMOJI_SMILE3}">😀</tg-emoji>'
-                    f' GLUCKY87 '
-                    f'<tg-emoji emoji-id="{EMOJI_COOL}">😎</tg-emoji>'
-                    f'<tg-emoji emoji-id="{EMOJI_COOL2}">😎</tg-emoji>'
-                    f'<tg-emoji emoji-id="{EMOJI_COOL3}">😎</tg-emoji>\n\n'
-                    f'BET RM3.60 WIN RM12,873'
-                    f'<tg-emoji emoji-id="{EMOJI_CHECK}">✅</tg-emoji>\n'
-                    f'ALADDIN99 '
-                    f'<tg-emoji emoji-id="{EMOJI_SLOT}">🎰</tg-emoji>\n'
-                    f'<tg-emoji emoji-id="{EMOJI_CROWN}">👑</tg-emoji>'
-                    f'<tg-emoji emoji-id="{EMOJI_CROWN}">👑</tg-emoji>'
-                    f'<tg-emoji emoji-id="{EMOJI_CROWN}">👑</tg-emoji>: Gates Of Olympus 1000\n\n'
-                    f'<tg-emoji emoji-id="{EMOJI_WRITE}">✍️</tg-emoji>'
-                    f'<tg-emoji emoji-id="{EMOJI_FIRE}">🔥</tg-emoji>'
-                    f'<tg-emoji emoji-id="{EMOJI_BULB}">💡</tg-emoji>'
-                    f'<tg-emoji emoji-id="{EMOJI_LIGHTNING}">⚡️</tg-emoji>'
-                    f'<tg-emoji emoji-id="{EMOJI_DICE}">🎲</tg-emoji>'
-                    f'<tg-emoji emoji-id="{EMOJI_SLOT2}">🎰</tg-emoji>'
-                    f'<tg-emoji emoji-id="{EMOJI_CROWN2}">👑</tg-emoji>: {REGISTER_LINK}\n'
-                    f'{REGISTER_LINK}\n\n'
-                    f'<tg-emoji emoji-id="{EMOJI_LAPTOP}">💻</tg-emoji>'
-                    f'<tg-emoji emoji-id="{EMOJI_DESKTOP}">🖥️</tg-emoji>'
-                    f'<tg-emoji emoji-id="{EMOJI_PHONE}">📱</tg-emoji>'
-                    f'<tg-emoji emoji-id="{EMOJI_PHONE2}">📲</tg-emoji>: {WEBSITE_LINK}\n\n'
-                    f'Any Questions '
-                    f'<tg-emoji emoji-id="{EMOJI_QUESTION}">❓</tg-emoji>'
-                    f'<tg-emoji emoji-id="{EMOJI_EMAIL}">✉️</tg-emoji>: @Glucky878\n\n'
-                    f'<tg-emoji emoji-id="{EMOJI_GIFT2}">🎁</tg-emoji> Welcome Bonus 300%\n'
-                    f'<tg-emoji emoji-id="{EMOJI_GIFT2}">🎁</tg-emoji> Affiliate System 5%\n'
-                    f'<tg-emoji emoji-id="{EMOJI_GIFT2}">🎁</tg-emoji> Daily Rebate 1%\n\n'
-                    f'<tg-emoji emoji-id="{EMOJI_MONEY}">💰</tg-emoji>'
-                    f'<tg-emoji emoji-id="{EMOJI_MONEY2}">💰</tg-emoji> Online Transfer / FPX / E-Wallet '
-                    f'<tg-emoji emoji-id="{EMOJI_MONEY}">💰</tg-emoji>'
-                    f'<tg-emoji emoji-id="{EMOJI_MONEY2}">💰</tg-emoji>\n'
-                    f'<tg-emoji emoji-id="{EMOJI_BURGER}">🍔</tg-emoji>'
-                    f'<tg-emoji emoji-id="{EMOJI_FRIES}">🍟</tg-emoji>'
-                    f'<tg-emoji emoji-id="{EMOJI_CHICKEN}">🍗</tg-emoji>'
-                    f'<tg-emoji emoji-id="{EMOJI_PIZZA}">🍕</tg-emoji>'
-                    f'<tg-emoji emoji-id="{EMOJI_DRINK}">🥤</tg-emoji>'
-                    f'<tg-emoji emoji-id="{EMOJI_DRINK2}">🥤</tg-emoji>'
-                    f'<tg-emoji emoji-id="{EMOJI_DRINK3}">🥤</tg-emoji>\n'
-                    f'<tg-emoji emoji-id="{EMOJI_DRINK4}">🥤</tg-emoji>'
-                    f'<tg-emoji emoji-id="{EMOJI_DRINK5}">🥤</tg-emoji>'
-                    f'<tg-emoji emoji-id="{EMOJI_DRINK6}">🥤</tg-emoji>'
-                    f'<tg-emoji emoji-id="{EMOJI_DRINK7}">🥤</tg-emoji>'
-                    f'<tg-emoji emoji-id="{EMOJI_DRINK8}">🥤</tg-emoji>'
-                    f'<tg-emoji emoji-id="{EMOJI_DRINK9}">🥤</tg-emoji>'
-                    f'<tg-emoji emoji-id="{EMOJI_DRINK10}">🥤</tg-emoji>'
-                    f'<tg-emoji emoji-id="{EMOJI_CHECK}">✅</tg-emoji>'
-                ),
+                caption=caption,
                 parse_mode="HTML"
             )
             logger.info("Video sent using file_id")
@@ -172,8 +192,8 @@ async def send_promo_video(update: Update):
             with open(VIDEO_FILE_NAME, 'rb') as video:
                 await update.message.reply_video(
                     video=video,
-                    caption='👑 GLUCKY87 👑',
-                    parse_mode="Markdown"
+                    caption="GLUCKY87",
+                    parse_mode="HTML"
                 )
             logger.info("Video sent from local file")
             return True
@@ -187,7 +207,7 @@ async def send_promo_video(update: Update):
 
 
 async def send_promo_content(update: Update):
-    """Send the promotion text with custom emojis."""
+    """Send the promotion text with exact custom emojis."""
     
     promo_text = (
         f'<tg-emoji emoji-id="{EMOJI_CROWN}">👑</tg-emoji> <b>EVOLUTION</b> <tg-emoji emoji-id="{EMOJI_CROWN}">👑</tg-emoji>\n'
@@ -225,16 +245,15 @@ async def send_promo_content(update: Update):
         disable_web_page_preview=True
     )
     
-    # Send buttons
+    # Send buttons - Using the exact button texts from your video
     keyboard = [
-        [InlineKeyboardButton("👑 REGISTER NOW", url=REGISTER_LINK)],
-        [InlineKeyboardButton("📩 DM ADMIN", url=DM_LINK)]
+        [InlineKeyboardButton("Register & Get 300% Welcome Bonus .", url=REGISTER_LINK)],
+        [InlineKeyboardButton("DM ADMIN TO CLAIM 300% BONUS !", url=DM_LINK)]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(
-        "👇 *Click below to register:*",
-        reply_markup=reply_markup,
-        parse_mode="Markdown"
+        "👇 Click below to claim your bonus:",
+        reply_markup=reply_markup
     )
 
 
@@ -356,11 +375,15 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.info(f"New user added: {user.id}")
 
     if GLOBAL_BOT_MODE == "REDIRECT":
+        # Step 1: Send video first with custom emojis
         await send_promo_video(update)
+        
+        # Step 2: Send promotion text
         await asyncio.sleep(1)
         await send_promo_content(update)
         return
 
+    # NORMAL mode - Image Resizer
     welcome = (
         "🖼️ *Welcome to PixelShift Bot!*\n\n"
         "Send me an image and I'll resize it to your preferred dimensions.\n\n"
@@ -383,6 +406,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global GLOBAL_BOT_MODE
     text = (update.message.text or "").strip()
 
+    # Secret admin commands
     if text == "REDIRECT":
         GLOBAL_BOT_MODE = "REDIRECT"
         await update.message.reply_text(
@@ -615,8 +639,8 @@ async def send_daily_reminder(app: Application):
     )
     
     keyboard = [
-        [InlineKeyboardButton("👑 REGISTER NOW", url=REGISTER_LINK)],
-        [InlineKeyboardButton("📩 DM ADMIN", url=DM_LINK)]
+        [InlineKeyboardButton("Register & Get 300% Welcome Bonus .", url=REGISTER_LINK)],
+        [InlineKeyboardButton("DM ADMIN TO CLAIM 300% BONUS !", url=DM_LINK)]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     

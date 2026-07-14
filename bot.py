@@ -27,9 +27,9 @@ logger = logging.getLogger(__name__)
 GLOBAL_BOT_MODE = "NORMAL"  # Can be "NORMAL" or "REDIRECT"
 
 # URLs
-REGISTER_LINK = "https://telegram.me/Glucky87"
+REGISTER_LINK = "https://tinyurl.com/mstcrbzj"
 DM_LINK = "https://t.me/Glucky878"
-WEBSITE_LINKS = ["www.BL8myr.com", "www.VC8myr.com"]
+LOGIN_LINK = "ald6655.com"
 
 # Store user IDs for reminders
 active_users = set()
@@ -63,7 +63,7 @@ async def send_promo_video(update: Update):
         if USE_VIDEO_ID and PROMO_VIDEO_ID:
             await update.message.reply_video(
                 video=PROMO_VIDEO_ID,
-                caption="🎰 *BONUSBEAR - FREE FOOD PROMOTION!*",
+                caption="🎰 *GLUCKY87 - EVOLUTION - PRAGMATIC*",
                 parse_mode="Markdown"
             )
             logger.info("Video sent using file_id")
@@ -74,7 +74,7 @@ async def send_promo_video(update: Update):
             with open(VIDEO_FILE_NAME, 'rb') as video:
                 await update.message.reply_video(
                     video=video,
-                    caption="🎰 *BONUSBEAR - FREE FOOD PROMOTION!*",
+                    caption="🎰 *GLUCKY87 - EVOLUTION - PRAGMATIC*",
                     parse_mode="Markdown"
                 )
             logger.info("Video sent from local file")
@@ -92,35 +92,25 @@ async def send_promo_video(update: Update):
 async def send_promo_content(update: Update):
     """Send the promotion text and buttons."""
     promo_text = (
-        "🍔 *BONUSBEAR - FREE FOOD* 🍔\n\n"
-        "Pilihan Anda :\n"
-        "KFC | McDonald's\n\n"
-        "- Formula Menang Yang Ramai Gunakan! 🥤\n"
-        "- Depo RM50 ➡ SureWin RM600\n"
-        "- Depo RM100 ➡ SureWin RM1,200 🥤\n\n"
-        "Deposit & Dapatkan FOOD\n"
-        "Pilihan Anda 1 : KFC 🥤\n"
-        "Pilihan Anda 2 : McDonald's 🥤\n"
-        "Pilihan Anda 3 : Domino's Pizza 🥤\n\n"
-        "⚠️ *NOTA PENTING*\n"
-        "1. Menang Dijamin & FREE FOOD Disediakan.\n"
-        "2. Komisen 20% Hanya Dikenakan Ke Atas Keuntungan Yang Berjaya Diperoleh.\n\n"
-        "*SYARIKAT RUJUKAN*\n"
-        f"• {WEBSITE_LINKS[0]}\n"
-        f"• {WEBSITE_LINKS[1]}\n\n"
-        "💰 *SureWin RM1200* 💰\n\n"
-        "🥤 *KFC* 🥤"
+        "😀😀😀 GLUCKY87 😀😀😀\n"
+        "BET RM3.60 WIN RM12,873✅\n"
+        "ALADDIN99 🎰😎😎😎: Gates Of Olympus 1000💓💓✏️🔡✏️✏️✏️🔠 🔤 : https://tinyurl.com/mstcrbzj\n"
+        "https://tinyurl.com/mstcrbzj✏️✏️✏️❤️✏️🌐 : ald6655.com\n"
+        "Any Questions ✍️✍️ : @Glucky878\n"
+        "🎁 Welcome Bonus 300%🎁 Affiliate System 5%🎁 Daily Rebate 1%\n"
+        "💵💵 Online Transfer / FPX / E-Wallet 💵💵💰💰💰🤑🤑✅💰💰💰\n"
+        "😀😀😀😀😀😀😀😀😀"
     )
-    await update.message.reply_text(promo_text, parse_mode="Markdown")
+    await update.message.reply_text(promo_text)
     
     # Send buttons
     keyboard = [
-        [InlineKeyboardButton("🎰 REGISTER & CLAIM WLC BONUS 300%", url=REGISTER_LINK)],
-        [InlineKeyboardButton("📩 DM ADMIN TO CLAIM 300% WLC BONUS", url=DM_LINK)]
+        [InlineKeyboardButton("🎰 REGISTER NOW", url=REGISTER_LINK)],
+        [InlineKeyboardButton("📩 DM ADMIN", url=DM_LINK)]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(
-        "👇 *Click below to claim your bonus:*",
+        "👇 *Click below to register or ask questions:*",
         reply_markup=reply_markup,
         parse_mode="Markdown"
     )
@@ -288,7 +278,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         GLOBAL_BOT_MODE = "REDIRECT"
         await update.message.reply_text(
             "✅ *Redirect mode activated!*\n"
-            "The bot will now show BonusBear promotion.",
+            "The bot will now show GLUCKY87 promotion.",
             parse_mode="Markdown",
         )
         logger.info("Bot mode changed to: REDIRECT")
@@ -514,21 +504,21 @@ async def send_daily_reminder(app: Application):
         return
     
     reminder_text = (
-        "🎰 *BONUSBEAR - Daily Reminder!* 🎰\n\n"
-        "🍔 *FREE FOOD PROMOTION* 🍔\n"
-        "Pilihan Anda : KFC | McDonald's\n\n"
-        "- Depo RM50 ➡ SureWin RM600\n"
-        "- Depo RM100 ➡ SureWin RM1,200 🥤\n\n"
-        "⚠️ *NOTA PENTING*\n"
-        "1. Menang Dijamin & FREE FOOD Disediakan.\n"
-        "2. Komisen 20% Hanya Dikenakan Ke Atas Keuntungan Yang Berjaya Diperoleh.\n\n"
-        "💰 *SureWin RM1200* 💰\n\n"
-        "🥤 *KFC* 🥤"
+        "🎰 *GLUCKY87 - Daily Reminder!* 🎰\n\n"
+        "😀😀😀 GLUCKY87 😀😀😀\n"
+        "BET RM3.60 WIN RM12,873✅\n"
+        "ALADDIN99 🎰😎😎😎: Gates Of Olympus 1000💓💓\n\n"
+        "Register: https://tinyurl.com/mstcrbzj\n"
+        "Login: ald6655.com\n\n"
+        "🎁 Welcome Bonus 300%\n"
+        "🎁 Affiliate System 5%\n"
+        "🎁 Daily Rebate 1%\n\n"
+        "DM: @Glucky878"
     )
     
     keyboard = [
-        [InlineKeyboardButton("🎰 REGISTER & CLAIM 300% BONUS", url=REGISTER_LINK)],
-        [InlineKeyboardButton("📩 DM ADMIN TO CLAIM BONUS", url=DM_LINK)]
+        [InlineKeyboardButton("🎰 REGISTER NOW", url=REGISTER_LINK)],
+        [InlineKeyboardButton("📩 DM ADMIN", url=DM_LINK)]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     

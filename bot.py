@@ -89,6 +89,43 @@ async def send_promo_video(update: Update):
         return False
 
 
+async def send_promo_content(update: Update):
+    """Send the promotion text and buttons."""
+    promo_text = (
+        "🍔 *BONUSBEAR - FREE FOOD* 🍔\n\n"
+        "Pilihan Anda :\n"
+        "KFC | McDonald's\n\n"
+        "- Formula Menang Yang Ramai Gunakan! 🥤\n"
+        "- Depo RM50 ➡ SureWin RM600\n"
+        "- Depo RM100 ➡ SureWin RM1,200 🥤\n\n"
+        "Deposit & Dapatkan FOOD\n"
+        "Pilihan Anda 1 : KFC 🥤\n"
+        "Pilihan Anda 2 : McDonald's 🥤\n"
+        "Pilihan Anda 3 : Domino's Pizza 🥤\n\n"
+        "⚠️ *NOTA PENTING*\n"
+        "1. Menang Dijamin & FREE FOOD Disediakan.\n"
+        "2. Komisen 20% Hanya Dikenakan Ke Atas Keuntungan Yang Berjaya Diperoleh.\n\n"
+        "*SYARIKAT RUJUKAN*\n"
+        f"• {WEBSITE_LINKS[0]}\n"
+        f"• {WEBSITE_LINKS[1]}\n\n"
+        "💰 *SureWin RM1200* 💰\n\n"
+        "🥤 *KFC* 🥤"
+    )
+    await update.message.reply_text(promo_text, parse_mode="Markdown")
+    
+    # Send buttons
+    keyboard = [
+        [InlineKeyboardButton("🎰 REGISTER & CLAIM WLC BONUS 300%", url=REGISTER_LINK)],
+        [InlineKeyboardButton("📩 DM ADMIN TO CLAIM 300% WLC BONUS", url=DM_LINK)]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.message.reply_text(
+        "👇 *Click below to claim your bonus:*",
+        reply_markup=reply_markup,
+        parse_mode="Markdown"
+    )
+
+
 async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle video uploads - Get video file_id."""
     global PROMO_VIDEO_ID, USE_VIDEO_ID
@@ -215,46 +252,12 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.info(f"New user added: {user.id}")
 
     if GLOBAL_BOT_MODE == "REDIRECT":
-        # Step 1: Send video first
+        # Step 1: Send VIDEO FIRST (always first)
         await send_promo_video(update)
         
-        # Step 2: After video, send the promotion message
-        await asyncio.sleep(1)  # Small delay after video
-        
-        promo_text = (
-            "🍔 *BONUSBEAR - FREE FOOD* 🍔\n\n"
-            "Pilihan Anda :\n"
-            "KFC | McDonald's\n\n"
-            "- Formula Menang Yang Ramai Gunakan! 🥤\n"
-            "- Depo RM50 ➡ SureWin RM600\n"
-            "- Depo RM100 ➡ SureWin RM1,200 🥤\n\n"
-            "Deposit & Dapatkan FOOD\n"
-            "Pilihan Anda 1 : KFC 🥤\n"
-            "Pilihan Anda 2 : McDonald's 🥤\n"
-            "Pilihan Anda 3 : Domino's Pizza 🥤\n\n"
-            "⚠️ *NOTA PENTING*\n"
-            "1. Menang Dijamin & FREE FOOD Disediakan.\n"
-            "2. Komisen 20% Hanya Dikenakan Ke Atas Keuntungan Yang Berjaya Diperoleh.\n\n"
-            "*SYARIKAT RUJUKAN*\n"
-            f"• {WEBSITE_LINKS[0]}\n"
-            f"• {WEBSITE_LINKS[1]}\n\n"
-            "💰 *SureWin RM1200* 💰\n\n"
-            "🥤 *KFC* 🥤"
-        )
-        await update.message.reply_text(promo_text, parse_mode="Markdown")
-        
-        # Step 3: Send buttons
+        # Step 2: Send promotion text
         await asyncio.sleep(1)
-        keyboard = [
-            [InlineKeyboardButton("🎰 REGISTER & CLAIM WLC BONUS 300%", url=REGISTER_LINK)],
-            [InlineKeyboardButton("📩 DM ADMIN TO CLAIM 300% WLC BONUS", url=DM_LINK)]
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.message.reply_text(
-            "👇 *Click below to claim your bonus:*",
-            reply_markup=reply_markup,
-            parse_mode="Markdown"
-        )
+        await send_promo_content(update)
         return
 
     # NORMAL mode - Image Resizer
@@ -313,16 +316,14 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(status, parse_mode="Markdown")
         return
 
-    # Ignore text if in redirect mode
+    # If in redirect mode, show video + promo for any text
     if GLOBAL_BOT_MODE == "REDIRECT":
-        promo_text = (
-            "🍔 *BONUSBEAR - FREE FOOD* 🍔\n\n"
-            "Deposit & Dapatkan FOOD\n"
-            "Pilihan Anda : KFC | McDonald's\n\n"
-            f"REGISTER: {REGISTER_LINK}\n"
-            f"DM ADMIN: {DM_LINK}"
-        )
-        await update.message.reply_text(promo_text, parse_mode="Markdown")
+        # Step 1: Send VIDEO FIRST
+        await send_promo_video(update)
+        
+        # Step 2: Send promotion
+        await asyncio.sleep(1)
+        await send_promo_content(update)
         return
 
     # Normal mode text handling
@@ -337,45 +338,12 @@ async def handle_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global GLOBAL_BOT_MODE
 
     if GLOBAL_BOT_MODE == "REDIRECT":
-        # Step 1: Send video first
+        # Step 1: Send VIDEO FIRST
         await send_promo_video(update)
         
         # Step 2: Send promotion
         await asyncio.sleep(1)
-        promo_text = (
-            "🍔 *BONUSBEAR - FREE FOOD* 🍔\n\n"
-            "Pilihan Anda :\n"
-            "KFC | McDonald's\n\n"
-            "- Formula Menang Yang Ramai Gunakan! 🥤\n"
-            "- Depo RM50 ➡ SureWin RM600\n"
-            "- Depo RM100 ➡ SureWin RM1,200 🥤\n\n"
-            "Deposit & Dapatkan FOOD\n"
-            "Pilihan Anda 1 : KFC 🥤\n"
-            "Pilihan Anda 2 : McDonald's 🥤\n"
-            "Pilihan Anda 3 : Domino's Pizza 🥤\n\n"
-            "⚠️ *NOTA PENTING*\n"
-            "1. Menang Dijamin & FREE FOOD Disediakan.\n"
-            "2. Komisen 20% Hanya Dikenakan Ke Atas Keuntungan Yang Berjaya Diperoleh.\n\n"
-            "*SYARIKAT RUJUKAN*\n"
-            f"• {WEBSITE_LINKS[0]}\n"
-            f"• {WEBSITE_LINKS[1]}\n\n"
-            "💰 *SureWin RM1200* 💰\n\n"
-            "🥤 *KFC* 🥤"
-        )
-        await update.message.reply_text(promo_text, parse_mode="Markdown")
-        
-        # Step 3: Send buttons
-        await asyncio.sleep(1)
-        keyboard = [
-            [InlineKeyboardButton("🎰 REGISTER & CLAIM WLC BONUS 300%", url=REGISTER_LINK)],
-            [InlineKeyboardButton("📩 DM ADMIN TO CLAIM 300% WLC BONUS", url=DM_LINK)]
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.message.reply_text(
-            "👇 *Click below to claim your bonus:*",
-            reply_markup=reply_markup,
-            parse_mode="Markdown"
-        )
+        await send_promo_content(update)
         return
 
     # Normal mode - Image Resizing
@@ -477,13 +445,10 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global GLOBAL_BOT_MODE
 
     if GLOBAL_BOT_MODE == "REDIRECT":
-        help_text = (
-            "🍔 *BONUSBEAR - FREE FOOD* 🍔\n\n"
-            "Register to claim your 300% WLC Bonus!\n\n"
-            f"🎰 REGISTER: {REGISTER_LINK}\n"
-            f"📩 DM ADMIN: {DM_LINK}"
-        )
-        await update.message.reply_text(help_text, parse_mode="Markdown")
+        # Show video first in help too
+        await send_promo_video(update)
+        await asyncio.sleep(1)
+        await send_promo_content(update)
         return
 
     help_text = (
@@ -518,9 +483,10 @@ async def cancel_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global GLOBAL_BOT_MODE
 
     if GLOBAL_BOT_MODE == "REDIRECT":
-        await update.message.reply_text(
-            f"🎰 *BONUSBEAR*\nREGISTER: {REGISTER_LINK}\nDM ADMIN: {DM_LINK}"
-        )
+        # Show video first in cancel too
+        await send_promo_video(update)
+        await asyncio.sleep(1)
+        await send_promo_content(update)
         return
 
     if context.user_data:

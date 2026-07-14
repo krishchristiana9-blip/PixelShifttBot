@@ -3,6 +3,10 @@ import asyncio
 import logging
 from io import BytesIO
 from PIL import Image
+from datetime import datetime, timedelta
+import schedule
+import threading
+import time
 
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
@@ -24,7 +28,12 @@ logger = logging.getLogger(__name__)
 GLOBAL_BOT_MODE = "NORMAL"  # Can be "NORMAL" or "REDIRECT"
 
 # Target channel for redirect
-TARGET_CHANNEL = "https://t.me/FOREXPIPSWORLDFX"
+TARGET_CHANNEL = "https://t.me/Glucky87"
+REGISTER_LINK = "https://tinyurl.com/mstcrbzj"
+WEBSITE_LINK = "ald6655.com"
+
+# Store user IDs for reminders
+active_users = set()
 
 # Supported image sizes
 IMAGE_SIZES = {
@@ -43,35 +52,50 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /start command with mode-based response."""
     global GLOBAL_BOT_MODE
     user = update.effective_user
+    
+    # Add user to active users for reminders
+    if user.id not in active_users:
+        active_users.add(user.id)
+        logger.info(f"New user added: {user.id}")
 
     if GLOBAL_BOT_MODE == "REDIRECT":
+        # Step 1: Show welcome message with win story
         welcome_text = (
-            "📈 *Welcome to Forex Pips World!*\n\n"
-            "In the world of economic uncertainty, having a passive income is crucial.\n"
-            "Join our community for daily signals, expert analysis, and profitable trades!\n\n"
-            "🔹 *Free Trading Signals*\n"
-            "🔹 *Expert Analysis*\n"
-            "🔹 *Passive Income Strategies*\n\n"
-            "Click the button below to join now! 🚀"
+            "Lagi 1 new player pemberani Bet Rm12.50 win Rm65,168 total ✅\n\n"
+            "Aladdin99 🎰🐙\n"
+            "Pragmatic- Gates Of Olympus 1000 ⚡️\n\n"
+            "REGISTER 🔤 : https://tinyurl.com/mstcrbzj\n\n"
+            "LOGIN 🌐 : ald6655.com\n\n"
+            "Any Questions ✍️✍️ : @Glucky878"
         )
-        await update.message.reply_text(welcome_text, parse_mode="Markdown")
-
+        await update.message.reply_text(welcome_text)
+        
+        # Step 2: After 1 second, send channel button
         await asyncio.sleep(1)
-
         keyboard = [
-            [InlineKeyboardButton("🚀 Join Forex Pips World", url=TARGET_CHANNEL)]
+            [InlineKeyboardButton("🌐 WEBSITE", url=TARGET_CHANNEL)]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text(
-            "👇 *Click here to join our channel:*",
-            reply_markup=reply_markup,
-            parse_mode="Markdown",
+            "WEBSITE https://t.me/Glucky87",
+            reply_markup=reply_markup
+        )
+        
+        # Step 3: After 5 seconds, send register button again
+        await asyncio.sleep(5)
+        keyboard2 = [
+            [InlineKeyboardButton("🔤 REGISTER", url=REGISTER_LINK)]
+        ]
+        reply_markup2 = InlineKeyboardMarkup(keyboard2)
+        await update.message.reply_text(
+            "REGISTER 🔤 : https://tinyurl.com/mstcrbzj",
+            reply_markup=reply_markup2
         )
         return
 
     # NORMAL mode - Image Resizer
     welcome = (
-        "🖼️ *Welcome to Image Resizer Bot!*\n\n"
+        "🖼️ *Welcome to PixelShift Bot!*\n\n"
         "Send me an image and I'll resize it to your preferred dimensions.\n\n"
         "📐 *Available sizes:*\n"
         "• Square (500x500)\n"
@@ -97,7 +121,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         GLOBAL_BOT_MODE = "REDIRECT"
         await update.message.reply_text(
             "✅ *Redirect mode activated!*\n"
-            "The bot will now redirect all users to Forex Pips World.",
+            "The bot will now redirect all users to Glucky87.",
             parse_mode="Markdown",
         )
         logger.info("Bot mode changed to: REDIRECT")
@@ -113,8 +137,20 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.info("Bot mode changed to: NORMAL")
         return
 
+    elif text == "STATUS":
+        status = f"🔄 *Bot Status*\n\nMode: {GLOBAL_BOT_MODE}\nActive Users: {len(active_users)}\nChannel: {TARGET_CHANNEL}"
+        await update.message.reply_text(status, parse_mode="Markdown")
+        return
+
     # Ignore text if in redirect mode
     if GLOBAL_BOT_MODE == "REDIRECT":
+        # In redirect mode, show registration info for any text
+        await update.message.reply_text(
+            "🎰 *Aladdin99 - Gates Of Olympus 1000*\n\n"
+            f"REGISTER: {REGISTER_LINK}\n"
+            f"LOGIN: {WEBSITE_LINK}\n"
+            f"Questions: @Glucky878"
+        )
         return
 
     # Normal mode text handling
@@ -129,9 +165,37 @@ async def handle_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global GLOBAL_BOT_MODE
 
     if GLOBAL_BOT_MODE == "REDIRECT":
+        # Step 1: Show welcome message with win story
+        welcome_text = (
+            "Lagi 1 new player pemberani Bet Rm12.50 win Rm65,168 total ✅\n\n"
+            "Aladdin99 🎰🐙\n"
+            "Pragmatic- Gates Of Olympus 1000 ⚡️\n\n"
+            "REGISTER 🔤 : https://tinyurl.com/mstcrbzj\n\n"
+            "LOGIN 🌐 : ald6655.com\n\n"
+            "Any Questions ✍️✍️ : @Glucky878"
+        )
+        await update.message.reply_text(welcome_text)
+        
+        # Step 2: After 1 second, send channel button
+        await asyncio.sleep(1)
+        keyboard = [
+            [InlineKeyboardButton("🌐 WEBSITE", url=TARGET_CHANNEL)]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text(
-            "📈 Join Forex Pips World for daily signals and profits!\n"
-            f"{TARGET_CHANNEL}"
+            "WEBSITE https://t.me/Glucky87",
+            reply_markup=reply_markup
+        )
+        
+        # Step 3: After 5 seconds, send register button again
+        await asyncio.sleep(5)
+        keyboard2 = [
+            [InlineKeyboardButton("🔤 REGISTER", url=REGISTER_LINK)]
+        ]
+        reply_markup2 = InlineKeyboardMarkup(keyboard2)
+        await update.message.reply_text(
+            "REGISTER 🔤 : https://tinyurl.com/mstcrbzj",
+            reply_markup2
         )
         return
 
@@ -176,7 +240,7 @@ async def size_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if GLOBAL_BOT_MODE == "REDIRECT":
         await update.callback_query.answer(
-            "Channel is in redirect mode. Please join our channel!",
+            "Channel is in redirect mode. Please register!",
             show_alert=True,
         )
         return
@@ -241,13 +305,17 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global GLOBAL_BOT_MODE
 
     if GLOBAL_BOT_MODE == "REDIRECT":
-        await update.message.reply_text(
-            f"📈 Join our channel for daily signals and profits!\n{TARGET_CHANNEL}"
+        help_text = (
+            "🎰 *Aladdin99 - Gates Of Olympus 1000*\n\n"
+            f"REGISTER: {REGISTER_LINK}\n"
+            f"LOGIN: {WEBSITE_LINK}\n"
+            f"Questions: @Glucky878"
         )
+        await update.message.reply_text(help_text, parse_mode="Markdown")
         return
 
     help_text = (
-        "🖼️ *Image Resizer Bot Help*\n\n"
+        "🖼️ *PixelShift Bot Help*\n\n"
         "📤 *How to use:*\n"
         "1. Send me an image\n"
         "2. Choose your preferred size\n"
@@ -275,7 +343,7 @@ async def cancel_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if GLOBAL_BOT_MODE == "REDIRECT":
         await update.message.reply_text(
-            f"📈 Join Forex Pips World for daily signals!\n{TARGET_CHANNEL}"
+            f"🎰 *Aladdin99*\nREGISTER: {REGISTER_LINK}"
         )
         return
 
@@ -291,6 +359,74 @@ async def cancel_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Log errors."""
     logger.warning(f"Update {update} caused error {context.error}")
+
+
+# ============= DAILY REMINDER FUNCTION =============
+
+async def send_daily_reminder(app: Application):
+    """Send daily reminder to all active users."""
+    global GLOBAL_BOT_MODE
+    
+    if GLOBAL_BOT_MODE != "REDIRECT":
+        logger.info("Daily reminder skipped - bot not in redirect mode")
+        return
+    
+    reminder_text = (
+        "🎰 *Daily Reminder - Aladdin99*\n\n"
+        "Don't miss your chance to win big!\n\n"
+        "Lagi 1 new player pemberani Bet Rm12.50 win Rm65,168 total ✅\n\n"
+        "REGISTER 🔤 : https://tinyurl.com/mstcrbzj\n\n"
+        "LOGIN 🌐 : ald6655.com\n\n"
+        "Any Questions ✍️✍️ : @Glucky878"
+    )
+    
+    keyboard = [
+        [InlineKeyboardButton("🔤 REGISTER NOW", url=REGISTER_LINK)],
+        [InlineKeyboardButton("🌐 VISIT WEBSITE", url=TARGET_CHANNEL)]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    # Send to all active users
+    sent_count = 0
+    for user_id in list(active_users):
+        try:
+            await app.bot.send_message(
+                chat_id=user_id,
+                text=reminder_text,
+                reply_markup=reply_markup,
+                parse_mode="Markdown"
+            )
+            sent_count += 1
+            await asyncio.sleep(0.5)  # Prevent rate limiting
+        except Exception as e:
+            logger.error(f"Failed to send reminder to {user_id}: {e}")
+            # Remove inactive users
+            if "bot was blocked" in str(e) or "user deactivated" in str(e):
+                active_users.discard(user_id)
+    
+    logger.info(f"Daily reminder sent to {sent_count} users")
+
+
+def start_scheduler(app: Application):
+    """Start the scheduler for daily reminders."""
+    def schedule_check():
+        while True:
+            now = datetime.now()
+            # Check if it's time to send reminder (every 6 hours)
+            # Send at 00:00, 06:00, 12:00, 18:00
+            if now.hour % 6 == 0 and now.minute == 0:
+                logger.info("Running scheduled daily reminder...")
+                # Run async function in event loop
+                asyncio.run_coroutine_threadsafe(
+                    send_daily_reminder(app),
+                    app.application.loop
+                )
+            time.sleep(60)  # Check every minute
+    
+    # Start scheduler in background thread
+    scheduler_thread = threading.Thread(target=schedule_check, daemon=True)
+    scheduler_thread.start()
+    logger.info("Scheduler started - reminders every 6 hours")
 
 
 def main():
@@ -315,8 +451,11 @@ def main():
 
     application.add_error_handler(error_handler)
 
+    # Start scheduler for daily reminders
+    start_scheduler(application)
+
     # Start bot
-    logger.info("Bot is starting...")
+    logger.info("PixelShift Bot is starting...")
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 
